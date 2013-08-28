@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-//#define LOG_NDEBUG 0
+#define LOG_NDEBUG 0
 #define LOG_TAG "SimplePlayer"
 #include <utils/Log.h>
 
@@ -297,9 +297,14 @@ status_t SimplePlayer::onPrepare() {
         AString mime;
         CHECK(format->findString("mime", &mime));
 
-        if (!haveAudio && !strncasecmp(mime.c_str(), "audio/", 6)) {
+        ALOGI("Extractor track %d, mime %s", i, mime.c_str());
+
+        bool isAudio = !strncasecmp(mime.c_str(), "audio/", 6);
+        bool isVideo = !strncasecmp(mime.c_str(), "video/", 6);
+
+        if (!haveAudio && isAudio) {
             haveAudio = true;
-        } else if (!haveVideo && !strncasecmp(mime.c_str(), "video/", 6)) {
+        } else if (!haveVideo && isVideo) {
             haveVideo = true;
         } else {
             continue;
@@ -320,7 +325,7 @@ status_t SimplePlayer::onPrepare() {
 
         err = state->mCodec->configure(
                 format,
-                mNativeWindow->getSurfaceTextureClient(),
+                isVideo ? mNativeWindow->getSurfaceTextureClient() : NULL,
                 NULL /* crypto */,
                 0 /* flags */);
 
