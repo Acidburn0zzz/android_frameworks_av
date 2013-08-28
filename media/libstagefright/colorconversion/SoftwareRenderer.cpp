@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+//#define LOG_NDEBUG 0
 #define LOG_TAG "SoftwareRenderer"
 #include <utils/Log.h>
 
@@ -38,6 +39,7 @@ SoftwareRenderer::SoftwareRenderer(
     : mConverter(NULL),
       mYUVMode(None),
       mNativeWindow(nativeWindow) {
+    ALOGI("Create SoftwareRenderer");
     int32_t tmp;
     CHECK(meta->findInt32(kKeyColorFormat, &tmp));
     mColorFormat = (OMX_COLOR_FORMATTYPE)tmp;
@@ -137,6 +139,7 @@ SoftwareRenderer::SoftwareRenderer(
 }
 
 SoftwareRenderer::~SoftwareRenderer() {
+    ALOGI("delete SoftwareRenderer");
     delete mConverter;
     mConverter = NULL;
 }
