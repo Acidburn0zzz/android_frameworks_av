@@ -47,6 +47,10 @@
 #include <media/stagefright/MetaData.h>
 #include <utils/String8.h>
 
+#ifdef USES_NAM
+#include <media/stagefright/MediaDebug.h>
+#endif
+
 namespace android {
 
 #ifdef USES_NAM
@@ -101,6 +105,17 @@ sp<MediaExtractor> MediaExtractor::Create(
             return NULL;
         }
     }
+
+#ifdef USES_NAM
+	AString extractorName;
+	if (meta != NULL && meta->findString("extended-extractor-use", &extractorName)) {
+		if (!strcasecmp("ffmpegextractor", extractorName.c_str())) {
+			ALOGI("we must use ffmpeg extractor for the special mime(%s) or codec", mime);
+			CHECK(sPlugin.create != NULL);
+			return sPlugin.create(source, mime, meta);
+		}
+	}
+#endif
 
     MediaExtractor *ret = NULL;
     if (!strcasecmp(mime, MEDIA_MIMETYPE_CONTAINER_MPEG4)
