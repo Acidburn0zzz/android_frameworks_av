@@ -526,6 +526,10 @@ status_t AwesomePlayer::setDataSource_l(const sp<MediaExtractor> &extractor) {
         }
     }
 
+#ifdef USES_NAM
+    ALOGV("haveAudio:%d, haveVideo:%d", haveAudio, haveVideo);
+#endif
+
     if (!haveAudio && !haveVideo) {
         if (mWVMExtractor != NULL) {
             return mWVMExtractor->getError();
@@ -1289,6 +1293,9 @@ void AwesomePlayer::initRenderer_l() {
     if (USE_SURFACE_ALLOC
             && !strncmp(component, "OMX.", 4)
             && strncmp(component, "OMX.google.", 11)
+#ifdef USES_NAM
+            && strncmp(component, "OMX.ffmpeg.", 11)
+#endif
             && strcmp(component, "OMX.Nvidia.mpeg2v.decode")) {
         // Hardware decoders avoid the CPU color conversion by decoding
         // directly to ANativeBuffers, so we must use a renderer that
