@@ -62,7 +62,7 @@ static void *loadExtractorPlugin() {
             ret = ::dlsym(extractorLib, "getExtractorPlugin");
             ALOGW_IF(!ret, "Failed to find symbol, dlerror: %s", ::dlerror());
         } else {
-            ALOGV("Failed to load %s, dlerror: %s", lib, ::dlerror());
+            ALOGW("Failed to load %s, dlerror: %s", lib, ::dlerror());
         }
     }
     return ret;
@@ -163,7 +163,7 @@ void DataSource::RegisterDefaultSniffers() {
 #endif
 #ifdef USES_NAM
     RegisterSnifferPlugin();
-#endif // USES_NAM
+#endif
 
     char value[PROPERTY_VALUE_MAX];
     if (property_get("drm.service.enabled", value, NULL)
