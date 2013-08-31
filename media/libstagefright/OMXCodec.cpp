@@ -2019,7 +2019,11 @@ status_t OMXCodec::allocateBuffersOnPort(OMX_U32 portIndex) {
         }
     }
 
+#ifdef USES_NAM
+    dumpPortStatus(portIndex);
+#else
     // dumpPortStatus(portIndex);
+#endif
 
     if (portIndex == kPortIndexInput && (mFlags & kUseSecureInputBuffers)) {
         Vector<MediaBuffer *> buffers;
@@ -4960,30 +4964,30 @@ void OMXCodec::dumpPortStatus(OMX_U32 portIndex) {
             mNode, OMX_IndexParamPortDefinition, &def, sizeof(def));
     CHECK_EQ(err, (status_t)OK);
 
-    printf("%s Port = {\n", portIndex == kPortIndexInput ? "Input" : "Output");
+    ALOGI("%s Port = {\n", portIndex == kPortIndexInput ? "Input" : "Output");
 
     CHECK((portIndex == kPortIndexInput && def.eDir == OMX_DirInput)
           || (portIndex == kPortIndexOutput && def.eDir == OMX_DirOutput));
 
-    printf("  nBufferCountActual = %ld\n", def.nBufferCountActual);
-    printf("  nBufferCountMin = %ld\n", def.nBufferCountMin);
-    printf("  nBufferSize = %ld\n", def.nBufferSize);
+    ALOGI("  nBufferCountActual = %ld\n", def.nBufferCountActual);
+    ALOGI("  nBufferCountMin = %ld\n", def.nBufferCountMin);
+    ALOGI("  nBufferSize = %ld\n", def.nBufferSize);
 
     switch (def.eDomain) {
         case OMX_PortDomainImage:
         {
             const OMX_IMAGE_PORTDEFINITIONTYPE *imageDef = &def.format.image;
 
-            printf("\n");
-            printf("  // Image\n");
-            printf("  nFrameWidth = %ld\n", imageDef->nFrameWidth);
-            printf("  nFrameHeight = %ld\n", imageDef->nFrameHeight);
-            printf("  nStride = %ld\n", imageDef->nStride);
+            ALOGI("\n");
+            ALOGI("  // Image\n");
+            ALOGI("  nFrameWidth = %ld\n", imageDef->nFrameWidth);
+            ALOGI("  nFrameHeight = %ld\n", imageDef->nFrameHeight);
+            ALOGI("  nStride = %ld\n", imageDef->nStride);
 
-            printf("  eCompressionFormat = %s\n",
+            ALOGI("  eCompressionFormat = %s\n",
                    imageCompressionFormatString(imageDef->eCompressionFormat));
 
-            printf("  eColorFormat = %s\n",
+            ALOGI("  eColorFormat = %s\n",
                    colorFormatString(imageDef->eColorFormat));
 
             break;
@@ -4993,16 +4997,16 @@ void OMXCodec::dumpPortStatus(OMX_U32 portIndex) {
         {
             OMX_VIDEO_PORTDEFINITIONTYPE *videoDef = &def.format.video;
 
-            printf("\n");
-            printf("  // Video\n");
-            printf("  nFrameWidth = %ld\n", videoDef->nFrameWidth);
-            printf("  nFrameHeight = %ld\n", videoDef->nFrameHeight);
-            printf("  nStride = %ld\n", videoDef->nStride);
+            ALOGI("\n");
+            ALOGI("  // Video\n");
+            ALOGI("  nFrameWidth = %ld\n", videoDef->nFrameWidth);
+            ALOGI("  nFrameHeight = %ld\n", videoDef->nFrameHeight);
+            ALOGI("  nStride = %ld\n", videoDef->nStride);
 
-            printf("  eCompressionFormat = %s\n",
+            ALOGI("  eCompressionFormat = %s\n",
                    videoCompressionFormatString(videoDef->eCompressionFormat));
 
-            printf("  eColorFormat = %s\n",
+            ALOGI("  eColorFormat = %s\n",
                    colorFormatString(videoDef->eColorFormat));
 
             break;
@@ -5012,9 +5016,9 @@ void OMXCodec::dumpPortStatus(OMX_U32 portIndex) {
         {
             OMX_AUDIO_PORTDEFINITIONTYPE *audioDef = &def.format.audio;
 
-            printf("\n");
-            printf("  // Audio\n");
-            printf("  eEncoding = %s\n",
+            ALOGI("\n");
+            ALOGI("  // Audio\n");
+            ALOGI("  eEncoding = %s\n",
                    audioCodingTypeString(audioDef->eEncoding));
 
             if (audioDef->eEncoding == OMX_AUDIO_CodingPCM) {
@@ -5026,16 +5030,16 @@ void OMXCodec::dumpPortStatus(OMX_U32 portIndex) {
                         mNode, OMX_IndexParamAudioPcm, &params, sizeof(params));
                 CHECK_EQ(err, (status_t)OK);
 
-                printf("  nSamplingRate = %ld\n", params.nSamplingRate);
-                printf("  nChannels = %ld\n", params.nChannels);
-                printf("  bInterleaved = %d\n", params.bInterleaved);
-                printf("  nBitPerSample = %ld\n", params.nBitPerSample);
+                ALOGI("  nSamplingRate = %ld\n", params.nSamplingRate);
+                ALOGI("  nChannels = %ld\n", params.nChannels);
+                ALOGI("  bInterleaved = %d\n", params.bInterleaved);
+                ALOGI("  nBitPerSample = %ld\n", params.nBitPerSample);
 
-                printf("  eNumData = %s\n",
+                ALOGI("  eNumData = %s\n",
                        params.eNumData == OMX_NumericalDataSigned
                         ? "signed" : "unsigned");
 
-                printf("  ePCMMode = %s\n", audioPCMModeString(params.ePCMMode));
+                ALOGI("  ePCMMode = %s\n", audioPCMModeString(params.ePCMMode));
             } else if (audioDef->eEncoding == OMX_AUDIO_CodingAMR) {
                 OMX_AUDIO_PARAM_AMRTYPE amr;
                 InitOMXParams(&amr);
@@ -5045,10 +5049,10 @@ void OMXCodec::dumpPortStatus(OMX_U32 portIndex) {
                         mNode, OMX_IndexParamAudioAmr, &amr, sizeof(amr));
                 CHECK_EQ(err, (status_t)OK);
 
-                printf("  nChannels = %ld\n", amr.nChannels);
-                printf("  eAMRBandMode = %s\n",
+                ALOGI("  nChannels = %ld\n", amr.nChannels);
+                ALOGI("  eAMRBandMode = %s\n",
                         amrBandModeString(amr.eAMRBandMode));
-                printf("  eAMRFrameFormat = %s\n",
+                ALOGI("  eAMRFrameFormat = %s\n",
                         amrFrameFormatString(amr.eAMRFrameFormat));
             }
 
@@ -5057,12 +5061,12 @@ void OMXCodec::dumpPortStatus(OMX_U32 portIndex) {
 
         default:
         {
-            printf("  // Unknown\n");
+            ALOGI("  // Unknown\n");
             break;
         }
     }
 
-    printf("}\n");
+    ALOGI("}\n");
 }
 
 status_t OMXCodec::initNativeWindow() {
