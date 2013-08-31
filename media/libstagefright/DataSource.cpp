@@ -46,8 +46,41 @@
 #include <utils/String8.h>
 
 #include <cutils/properties.h>
+#ifdef USES_NAM
+#include <cutils/log.h>
+#include <dlfcn.h>
+#endif
 
 namespace android {
+
+#ifdef USES_NAM
+static void *loadExtractorPlugin() {
+    void *ret = NULL;
+    char lib[PROPERTY_VALUE_MAX];
+    if (property_get("media.stagefright.extractor-plugin", lib, "libFFmpegExtractor.so")) {
+        if (void *extractorLib = ::dlopen(lib, RTLD_LAZY)) {
+            ret = ::dlsym(extractorLib, "getExtractorPlugin");
+            ALOGW_IF(!ret, "Failed to find symbol, dlerror: %s", ::dlerror());
+        } else {
+            ALOGV("Failed to load %s, dlerror: %s", lib, ::dlerror());
+        }
+    }
+    return ret;
+}
+
+static void RegisterSnifferPlugin() {
+    static void (*getExtractorPlugin)(MediaExtractor::Plugin *) =
+            (void (*)(MediaExtractor::Plugin *))loadExtractorPlugin();
+
+    MediaExtractor::Plugin *plugin = MediaExtractor::getPlugin();
+    if (!plugin->sniff && getExtractorPlugin) {
+        getExtractorPlugin(plugin);
+    }
+    if (plugin->sniff) {
+        DataSource::RegisterSniffer(plugin->sniff);
+    }
+}
+#endif // USES_NAM
 
 bool DataSource::getUInt16(off64_t offset, uint16_t *x) {
     *x = 0;
@@ -128,6 +161,9 @@ void DataSource::RegisterDefaultSniffers() {
 #ifdef QCOM_HARDWARE
     RegisterSniffer(SniffExtendedExtractor);
 #endif
+#ifdef USES_NAM
+    RegisterSnifferPlugin();
+#endif // USES_NAM
 
     char value[PROPERTY_VALUE_MAX];
     if (property_get("drm.service.enabled", value, NULL)

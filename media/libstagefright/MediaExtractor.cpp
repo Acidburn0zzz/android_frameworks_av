@@ -49,6 +49,10 @@
 
 namespace android {
 
+#ifdef USES_NAM
+MediaExtractor::Plugin MediaExtractor::sPlugin;
+#endif // USES_NAM
+
 sp<MetaData> MediaExtractor::getMetaData() {
     return new MetaData;
 }
@@ -133,6 +137,10 @@ sp<MediaExtractor> MediaExtractor::Create(
     } else if (!strcasecmp(mime, MEDIA_MIMETYPE_AUDIO_RAW)) {
         ret = new PCMExtractor(source);
 #endif
+#ifdef USES_NAM
+    } else if (sPlugin.create) {
+        ret = sPlugin.create(source, mime, meta);
+#endif // USES_NAM
     }
 
     if (ret != NULL) {

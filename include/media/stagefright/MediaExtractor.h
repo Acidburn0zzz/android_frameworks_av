@@ -20,6 +20,9 @@
 #define MEDIA_EXTRACTOR_H_
 
 #include <utils/RefBase.h>
+#ifdef USES_NAM
+#include <media/stagefright/DataSource.h>
+#endif
 
 namespace android {
 
@@ -29,6 +32,20 @@ class MetaData;
 
 class MediaExtractor : public RefBase {
 public:
+#ifdef USES_NAM
+    typedef MediaExtractor *(*CreateFunc)(const sp<DataSource> &source,
+            const char *mime, const sp<AMessage> &meta);
+
+    struct Plugin {
+        DataSource::SnifferFunc sniff;
+        CreateFunc create;
+    };
+
+    static Plugin *getPlugin() {
+        return &sPlugin;
+    }
+#endif // USES_NAM
+
     static sp<MediaExtractor> Create(
             const sp<DataSource> &source, const char *mime = NULL);
 
@@ -74,6 +91,9 @@ protected:
 
 private:
     bool mIsDrm;
+#ifdef USES_NAM
+    static Plugin sPlugin;
+#endif
 
     MediaExtractor(const MediaExtractor &);
     MediaExtractor &operator=(const MediaExtractor &);

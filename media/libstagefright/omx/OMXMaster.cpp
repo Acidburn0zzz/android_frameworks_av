@@ -71,6 +71,11 @@ void OMXMaster::addPlugin(const char *libname) {
 }
 
 void OMXMaster::addPlugin(OMXPluginBase *plugin) {
+#ifdef USES_NAM
+    if (plugin == 0) {
+       return;
+    }
+#endif
     Mutex::Autolock autoLock(mLock);
 
     mPlugins.push_back(plugin);
