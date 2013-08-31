@@ -32,6 +32,10 @@
 #include "include/QCUtilityClass.h"
 #endif
 
+#ifdef USES_NAM
+#include <media/stagefright/MediaDefs.h>
+#endif
+
 namespace android {
 
 static Mutex sInitMutex;
@@ -59,6 +63,12 @@ MediaCodecList::MediaCodecList()
         return;
     }
 
+#ifdef USES_NAM
+	//Why here? We need higher priority.
+	//TODO should be move to "/etc/media_codecs.xml"
+	addMediaCodec(false /* encoder */, "OMX.ffmpeg.aac.decoder", MEDIA_MIMETYPE_AUDIO_AAC);
+#endif //USES_NAM
+
     parseXMLFile(file);
 
     if (mInitCheck == OK) {
@@ -78,7 +88,7 @@ MediaCodecList::MediaCodecList()
 #endif
     }
 
-#if 0
+#if 1
     for (size_t i = 0; i < mCodecInfos.size(); ++i) {
         const CodecInfo &info = mCodecInfos.itemAt(i);
 
