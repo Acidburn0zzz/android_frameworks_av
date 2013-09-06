@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-//#define LOG_NDEBUG 0
+#define LOG_NDEBUG 0
 #define LOG_TAG "MediaCodecList"
 #include <utils/Log.h>
 
@@ -62,32 +62,6 @@ MediaCodecList::MediaCodecList()
         ALOGW("unable to open media codecs configuration xml file.");
         return;
     }
-
-#ifdef USES_NAM
-	//Why here? We need higher priority to call our ffmpeg decoders.
-	//TODO should be move to "/etc/media_codecs.xml"
-
-	//video
-	addMediaCodec(false /* encoder */, "OMX.ffmpeg.h264.decoder",   MEDIA_MIMETYPE_VIDEO_AVC   );
-	addMediaCodec(false /* encoder */, "OMX.ffmpeg.h263.decoder",   MEDIA_MIMETYPE_VIDEO_H263  );
-	addMediaCodec(false /* encoder */, "OMX.ffmpeg.mpeg4.decoder",  MEDIA_MIMETYPE_VIDEO_MPEG4 );
-	addMediaCodec(false /* encoder */, "OMX.ffmpeg.mpeg2v.decoder", MEDIA_MIMETYPE_VIDEO_MPEG2 );
-	addMediaCodec(false /* encoder */, "OMX.ffmpeg.vc1.decoder",    MEDIA_MIMETYPE_VIDEO_VC1   );
-	addMediaCodec(false /* encoder */, "OMX.ffmpeg.wmv.decoder",    MEDIA_MIMETYPE_VIDEO_WMV   );
-	addMediaCodec(false /* encoder */, "OMX.ffmpeg.rv.decoder",     MEDIA_MIMETYPE_VIDEO_RV    );
-
-	//audio
-	addMediaCodec(false /* encoder */, "OMX.ffmpeg.aac.decoder",    MEDIA_MIMETYPE_AUDIO_AAC   );
-	addMediaCodec(false /* encoder */, "OMX.ffmpeg.mp3.decoder",    MEDIA_MIMETYPE_AUDIO_MPEG  );
-	addMediaCodec(false /* encoder */, "OMX.ffmpeg.mp1.decoder",    MEDIA_MIMETYPE_AUDIO_MPEG_LAYER_I  );
-	addMediaCodec(false /* encoder */, "OMX.ffmpeg.mp2.decoder",    MEDIA_MIMETYPE_AUDIO_MPEG_LAYER_II );
-	addMediaCodec(false /* encoder */, "OMX.ffmpeg.ac3.decoder",    MEDIA_MIMETYPE_AUDIO_AC3   );
-	addMediaCodec(false /* encoder */, "OMX.ffmpeg.wma.decoder",    MEDIA_MIMETYPE_AUDIO_WMA   );
-	addMediaCodec(false /* encoder */, "OMX.ffmpeg.ra.decoder",     MEDIA_MIMETYPE_AUDIO_RA    );
-	addMediaCodec(false /* encoder */, "OMX.ffmpeg.ape.decoder",    MEDIA_MIMETYPE_AUDIO_APE   );
-	addMediaCodec(false /* encoder */, "OMX.ffmpeg.dts.decoder",    MEDIA_MIMETYPE_AUDIO_DTS   );
-	addMediaCodec(false /* encoder */, "OMX.ffmpeg.flac.decoder",   MEDIA_MIMETYPE_AUDIO_FLAC  );
-#endif //USES_NAM
 
     parseXMLFile(file);
 
