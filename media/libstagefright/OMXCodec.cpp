@@ -680,6 +680,16 @@ status_t OMXCodec::configureCodec(const sp<MetaData> &meta) {
     }
 #endif
 
+#ifdef USES_NAM
+    if (!strcasecmp(MEDIA_MIMETYPE_VIDEO_WMV, mMIME)) {
+        ALOGV("Setting the OMX_VIDEO_PARAM_WMVTYPE params");
+        status_t err = setWMVFormat(meta);
+        if (err != OK) {
+            return err;
+        }
+    }
+#endif
+
     int32_t bitRate = 0;
     if (mIsEncoder) {
         CHECK(meta->findInt32(kKeyBitRate, &bitRate));
