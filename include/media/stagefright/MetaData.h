@@ -137,6 +137,7 @@ enum {
     kKeyWMVProfile        = 'wmvp',  // int32_t
     kKeyWMVVersion        = 'wmvv',  // int32_t
     kKeyBlockAlign        = 'blk',   // int32_t , should be different from kKeyWMABlockAlign
+    kKeyRVVersion         = '#rvv',  // int32_t,
 #endif //USES_NAM
 
     // An indication that a video buffer has been rendered.
@@ -200,6 +201,13 @@ enum {
     kTypeWMVVer_7, // WMV1
     kTypeWMVVer_8, // WMV2
     kTypeWMVVer_9, // WMV3
+};
+
+//http://en.wikipedia.org/wiki/RealVideo
+enum {
+    kTypeRVVer_G2, // rv20: RealVideo G2
+    kTypeRVVer_8,  // rv30: RealVideo 8
+    kTypeRVVer_9,  // rv40: RealVideo 9
 };
 #endif USES_NAM
 

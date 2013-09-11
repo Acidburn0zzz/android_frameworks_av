@@ -399,6 +399,7 @@ private:
 
 #ifdef USES_NAM
 	status_t setWMVFormat(const sp<MetaData> &inputFormat);
+	status_t setRVFormat(const sp<MetaData> &inputFormat);
 	status_t setRAFormat(const sp<MetaData> &inputFormat);
 	status_t setAPEFormat(const sp<MetaData> &inputFormat);
 	status_t setDTSFormat(const sp<MetaData> &inputFormat);
