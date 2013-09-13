@@ -44,6 +44,11 @@ static bool FileHasAcceptableExtension(const char *extension) {
         ".wav", ".amr", ".midi", ".xmf", ".rtttl", ".rtx", ".ota",
         ".mkv", ".mka", ".webm", ".ts", ".fl", ".flac", ".mxmf",
         ".avi", ".mpg",
+#ifdef USES_NAM
+        ".mov",".avi",".flv",".wmv", ".asf", ".mpg",".vob",".rm",
+        ".rmvb",".flac",".ape",".mpga",".ts",".m2ts",".mp2",".mp1",
+        ".f4v",".divx","vc1","ac3","hlv","nrg","m2v",
+#endif
 #ifndef QCOM_HARDWARE
        ".mpeg"
 #else

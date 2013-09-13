@@ -108,7 +108,7 @@ sp<MediaExtractor> MediaExtractor::Create(
 
 #ifdef USES_NAM
 	AString extractorName;
-	if (meta != NULL && meta->findString("extended-extractor-use", &extractorName)) {
+	if (meta.get() != NULL && meta->findString("extended-extractor-use", &extractorName)) {
 		if (!strcasecmp("ffmpegextractor", extractorName.c_str())) {
 			ALOGI("we must use ffmpeg extractor for the special mime(%s) or codec", mime);
 			CHECK(sPlugin.create != NULL);

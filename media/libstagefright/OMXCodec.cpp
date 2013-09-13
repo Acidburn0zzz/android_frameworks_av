@@ -1563,6 +1563,8 @@ status_t OMXCodec::setVideoOutputFormat(
 		compressionFormat = OMX_VIDEO_CodingWMV;
 	} else if (!strcasecmp(MEDIA_MIMETYPE_VIDEO_RV, mime)) {
 		compressionFormat = OMX_VIDEO_CodingRV;
+	} else if (!strcasecmp(MEDIA_MIMETYPE_VIDEO_FLV1, mime)) {
+		compressionFormat = OMX_VIDEO_CodingAutoDetect;
 #endif
     } else {
 #ifdef QCOM_HARDWARE
