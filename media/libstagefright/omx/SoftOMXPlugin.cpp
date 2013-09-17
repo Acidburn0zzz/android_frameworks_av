@@ -45,6 +45,7 @@ static const struct {
     { "OMX.ffmpeg.wmv.decoder", "ffmpegvdec", "video_decoder.wmv" },
     { "OMX.ffmpeg.flv.decoder", "ffmpegvdec", "video_decoder.flv" },
     { "OMX.ffmpeg.rv.decoder", "ffmpegvdec", "video_decoder.rv" },
+    { "OMX.ffmpeg.vheuristic.decoder", "ffmpegvdec", "video_decoder.heuristic" },
     { "OMX.ffmpeg.mp1.decoder", "ffmpegadec", "audio_decoder.mp1" },
     { "OMX.ffmpeg.mp2.decoder", "ffmpegadec", "audio_decoder.mp2" },
     { "OMX.ffmpeg.mp3.decoder", "ffmpegadec", "audio_decoder.mp3" },
@@ -56,6 +57,7 @@ static const struct {
     { "OMX.ffmpeg.dts.decoder", "ffmpegadec", "audio_decoder.dts" },
     { "OMX.ffmpeg.flac.decoder", "ffmpegadec", "audio_decoder.flac" },
     { "OMX.ffmpeg.vorbis.decoder", "ffmpegadec", "audio_decoder.vorbis" },
+    { "OMX.ffmpeg.aheuristic.decoder", "ffmpegadec", "audio_decoder.heuristic" },
 #endif // USES_NAM
     { "OMX.google.aac.decoder", "aacdec", "audio_decoder.aac" },
     { "OMX.google.aac.encoder", "aacenc", "audio_encoder.aac" },

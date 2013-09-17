@@ -404,6 +404,8 @@ private:
 	status_t setAPEFormat(const sp<MetaData> &inputFormat);
 	status_t setDTSFormat(const sp<MetaData> &inputFormat);
 	status_t setFLACFormat(const sp<MetaData> &inputFormat);
+	status_t setFFmpegVideoFormat(const sp<MetaData> &inputFormat);
+	status_t setFFmpegAudioFormat(const sp<MetaData> &inputFormat);
 #endif
 
 };
