@@ -772,8 +772,28 @@ status_t OMXCodec::configureCodec(const sp<MetaData> &meta) {
         }
 #endif
 #ifdef USES_NAM
+	} else if (!strcasecmp(MEDIA_MIMETYPE_AUDIO_VORBIS, mMIME))  {
+		status_t err = setVORBISFormat(meta);
+		if (err!=OK) {
+			return err;
+		}
 	} else if (!strcasecmp(MEDIA_MIMETYPE_AUDIO_RA, mMIME))  {
 		status_t err = setRAFormat(meta);
+		if (err!=OK) {
+			return err;
+		}
+	} else if (!strcasecmp(MEDIA_MIMETYPE_AUDIO_FLAC, mMIME))  {
+		status_t err = setFLACFormat(meta);
+		if (err!=OK) {
+			return err;
+		}
+	} else if (!strcasecmp(MEDIA_MIMETYPE_AUDIO_MP2, mMIME))  {
+		status_t err = setMP2Format(meta);
+		if (err!=OK) {
+			return err;
+		}
+    } else if (!strcasecmp(MEDIA_MIMETYPE_AUDIO_AC3, mMIME)) {
+		status_t err = setAC3Format(meta);
 		if (err!=OK) {
 			return err;
 		}
@@ -784,11 +804,6 @@ status_t OMXCodec::configureCodec(const sp<MetaData> &meta) {
 		}
 	} else if (!strcasecmp(MEDIA_MIMETYPE_AUDIO_DTS, mMIME))  {
 		status_t err = setDTSFormat(meta);
-		if (err!=OK) {
-			return err;
-		}
-	} else if (!strcasecmp(MEDIA_MIMETYPE_AUDIO_FLAC, mMIME))  {
-		status_t err = setFLACFormat(meta);
 		if (err!=OK) {
 			return err;
 		}
@@ -1574,12 +1589,14 @@ status_t OMXCodec::setVideoOutputFormat(
 #ifdef USES_NAM
 	} else if (!strcasecmp(MEDIA_MIMETYPE_VIDEO_WMV, mime)) {
 		compressionFormat = OMX_VIDEO_CodingWMV;
-	} else if (!strcasecmp(MEDIA_MIMETYPE_VIDEO_VC1, mime)) {
-		compressionFormat = OMX_VIDEO_CodingWMV;
 	} else if (!strcasecmp(MEDIA_MIMETYPE_VIDEO_RV, mime)) {
 		compressionFormat = OMX_VIDEO_CodingRV;
+	} else if (!strcasecmp(MEDIA_MIMETYPE_VIDEO_VC1, mime)) {
+		compressionFormat = OMX_VIDEO_CodingWMV;
 	} else if (!strcasecmp(MEDIA_MIMETYPE_VIDEO_FLV1, mime)) {
-		compressionFormat = OMX_VIDEO_CodingAutoDetect;
+		compressionFormat = OMX_VIDEO_CodingFLV1;
+	} else if (!strcasecmp(MEDIA_MIMETYPE_VIDEO_DIVX, mime)) {
+		compressionFormat = OMX_VIDEO_CodingDIVX;
 	} else if (!strcasecmp(MEDIA_MIMETYPE_VIDEO_FFMPEG, mime)) {
 		compressionFormat = OMX_VIDEO_CodingAutoDetect;
 #endif
@@ -4300,58 +4317,7 @@ status_t OMXCodec::setWMAFormat(const sp<MetaData> &meta)
 #endif
 
 #if USES_NAM
-status_t OMXCodec::setWMAFormat(const sp<MetaData> &meta)
-{
-    int32_t version = 0;
-    int32_t numChannels = 0;
-    int32_t bitRate = 0;
-    int32_t sampleRate = 0;
-    int32_t blockAlign = 0;
-    int32_t formattag = 0;
-    OMX_AUDIO_PARAM_WMATYPE paramWMA;
-
-    if (mIsEncoder) {
-        CODEC_LOGE("WMA encoding not supported");
-        return OK;
-    }
-
-    CHECK(meta->findInt32(kKeyChannelCount, &numChannels));
-    CHECK(meta->findInt32(kKeySampleRate, &sampleRate));
-    CHECK(meta->findInt32(kKeyBitRate, &bitRate));
-    CHECK(meta->findInt32(kKeyBlockAlign, &blockAlign));
-
-    CODEC_LOGV("Channels: %d, SampleRate: %d, BitRate: %d, blockAlign: %d",
-            numChannels, sampleRate, bitRate, blockAlign);
-
-    CHECK(meta->findInt32(kKeyWMAVersion, &version));
-
-    InitOMXParams(&paramWMA);
-    paramWMA.nPortIndex = kPortIndexInput;
-
-    status_t err = mOMX->getParameter(
-                       mNode, OMX_IndexParamAudioWma, &paramWMA, sizeof(paramWMA));
-    if (err != OK)
-        return err;
-
-    paramWMA.nChannels = numChannels;
-    paramWMA.nSamplingRate = sampleRate;
-    paramWMA.nBitRate = bitRate;
-    paramWMA.nBlockAlign = blockAlign;
-
-    // http://msdn.microsoft.com/en-us/library/ff819498(v=vs.85).aspx
-    if(version == kTypeWMA) {
-        paramWMA.eFormat = OMX_AUDIO_WMAFormat7;
-    } else if (version == kTypeWMAPro) {
-        paramWMA.eFormat = OMX_AUDIO_WMAFormat8;
-    } else if (version == kTypeWMALossLess) {
-        paramWMA.eFormat = OMX_AUDIO_WMAFormat9;
-    }
-
-    err = mOMX->setParameter(
-                    mNode, OMX_IndexParamAudioWma, &paramWMA, sizeof(paramWMA));
-    return err;
-}
-
+//video
 status_t OMXCodec::setWMVFormat(const sp<MetaData> &meta)
 {
     int32_t version = 0;
@@ -4418,6 +4384,130 @@ status_t OMXCodec::setRVFormat(const sp<MetaData> &meta)
     return err;
 }
 
+
+status_t OMXCodec::setFFmpegVideoFormat(const sp<MetaData> &meta)
+{
+    int32_t codec_id = 0;
+    int32_t width = 0;
+    int32_t height = 0;
+    OMX_VIDEO_PARAM_FFMPEGTYPE param;
+
+    ALOGD("setFFmpegVideoFormat");
+
+    if (mIsEncoder) {
+        CODEC_LOGE("FFMPEG encoding not supported");
+        return OK;
+    }
+
+    CHECK(meta->findInt32(kKeyCodecId, &codec_id));
+    CHECK(meta->findInt32(kKeyWidth, &width));
+    CHECK(meta->findInt32(kKeyHeight, &height));
+
+    InitOMXParams(&param);
+    param.nPortIndex = kPortIndexInput;
+
+    status_t err = mOMX->getParameter(
+                       mNode, (OMX_INDEXTYPE)OMX_IndexParamVideoFFmpeg,
+                       &param, sizeof(param));
+    if (err != OK)
+        return err;
+
+    param.eCodecId = codec_id;
+    param.nWidth   = width;
+    param.nHeight  = height;
+
+    err = mOMX->setParameter(
+                    mNode, (OMX_INDEXTYPE)OMX_IndexParamVideoFFmpeg,
+                    &param, sizeof(param));
+    return err;
+}
+
+//audio
+status_t OMXCodec::setWMAFormat(const sp<MetaData> &meta)
+{
+    int32_t version = 0;
+    int32_t numChannels = 0;
+    int32_t bitRate = 0;
+    int32_t sampleRate = 0;
+    int32_t blockAlign = 0;
+    int32_t formattag = 0;
+    OMX_AUDIO_PARAM_WMATYPE paramWMA;
+
+    if (mIsEncoder) {
+        CODEC_LOGE("WMA encoding not supported");
+        return OK;
+    }
+
+    CHECK(meta->findInt32(kKeyChannelCount, &numChannels));
+    CHECK(meta->findInt32(kKeySampleRate, &sampleRate));
+    CHECK(meta->findInt32(kKeyBitRate, &bitRate));
+    CHECK(meta->findInt32(kKeyBlockAlign, &blockAlign));
+
+    CODEC_LOGV("Channels: %d, SampleRate: %d, BitRate: %d, blockAlign: %d",
+            numChannels, sampleRate, bitRate, blockAlign);
+
+    CHECK(meta->findInt32(kKeyWMAVersion, &version));
+
+    InitOMXParams(&paramWMA);
+    paramWMA.nPortIndex = kPortIndexInput;
+
+    status_t err = mOMX->getParameter(
+                       mNode, OMX_IndexParamAudioWma, &paramWMA, sizeof(paramWMA));
+    if (err != OK)
+        return err;
+
+    paramWMA.nChannels = numChannels;
+    paramWMA.nSamplingRate = sampleRate;
+    paramWMA.nBitRate = bitRate;
+    paramWMA.nBlockAlign = blockAlign;
+
+    // http://msdn.microsoft.com/en-us/library/ff819498(v=vs.85).aspx
+    if(version == kTypeWMA) {
+        paramWMA.eFormat = OMX_AUDIO_WMAFormat7;
+    } else if (version == kTypeWMAPro) {
+        paramWMA.eFormat = OMX_AUDIO_WMAFormat8;
+    } else if (version == kTypeWMALossLess) {
+        paramWMA.eFormat = OMX_AUDIO_WMAFormat9;
+    }
+
+    err = mOMX->setParameter(
+                    mNode, OMX_IndexParamAudioWma, &paramWMA, sizeof(paramWMA));
+    return err;
+}
+
+status_t OMXCodec::setVORBISFormat(const sp<MetaData> &meta)
+{
+    int32_t numChannels = 0;
+    int32_t sampleRate = 0;
+    OMX_AUDIO_PARAM_VORBISTYPE param;
+
+    if (mIsEncoder) {
+        CODEC_LOGE("VORBIS encoding not supported");
+        return OK;
+    }
+
+    CHECK(meta->findInt32(kKeyChannelCount, &numChannels));
+    CHECK(meta->findInt32(kKeySampleRate, &sampleRate));
+
+    CODEC_LOGV("Channels: %d, SampleRate: %d",
+            numChannels, sampleRate);
+
+    InitOMXParams(&param);
+    param.nPortIndex = kPortIndexInput;
+
+    status_t err = mOMX->getParameter(
+                       mNode, OMX_IndexParamAudioVorbis, &param, sizeof(param));
+    if (err != OK)
+        return err;
+
+    param.nChannels = numChannels;
+    param.nSampleRate = sampleRate;
+
+    err = mOMX->setParameter(
+                    mNode, OMX_IndexParamAudioVorbis, &param, sizeof(param));
+    return err;
+}
+
 status_t OMXCodec::setRAFormat(const sp<MetaData> &meta)
 {
     int32_t numChannels = 0;
@@ -4459,78 +4549,6 @@ status_t OMXCodec::setRAFormat(const sp<MetaData> &meta)
     return err;
 }
 
-status_t OMXCodec::setAPEFormat(const sp<MetaData> &meta)
-{
-    int32_t numChannels = 0;
-    int32_t sampleRate = 0;
-    int32_t bitsPerSample = 0;
-    OMX_AUDIO_PARAM_APETYPE param;
-
-    if (mIsEncoder) {
-        CODEC_LOGE("APE encoding not supported");
-        return OK;
-    }
-
-    CHECK(meta->findInt32(kKeyChannelCount, &numChannels));
-    CHECK(meta->findInt32(kKeySampleRate, &sampleRate));
-    CHECK(meta->findInt32(kKeyBitspersample, &bitsPerSample));
-
-    CODEC_LOGV("Channels: %d, SampleRate: %d",
-            numChannels, sampleRate);
-
-    InitOMXParams(&param);
-    param.nPortIndex = kPortIndexInput;
-
-    status_t err = mOMX->getParameter(
-                       mNode, OMX_IndexParamAudioApe, &param, sizeof(param));
-    if (err != OK)
-        return err;
-
-    param.nChannels = numChannels;
-    param.nSamplingRate = sampleRate;
-    param.nBitsPerSample = bitsPerSample;
-
-    err = mOMX->setParameter(
-                    mNode, OMX_IndexParamAudioApe, &param, sizeof(param));
-    return err;
-}
-
-status_t OMXCodec::setDTSFormat(const sp<MetaData> &meta)
-{
-    int32_t numChannels = 0;
-    int32_t sampleRate = 0;
-    int32_t bitsPerSample = 0;
-    OMX_AUDIO_PARAM_DTSTYPE param;
-
-    if (mIsEncoder) {
-        CODEC_LOGE("DTS encoding not supported");
-        return OK;
-    }
-
-    CHECK(meta->findInt32(kKeyChannelCount, &numChannels));
-    CHECK(meta->findInt32(kKeySampleRate, &sampleRate));
-    //CHECK(meta->findInt32(kKeyBitspersample, &bitsPerSample));
-
-    CODEC_LOGV("Channels: %d, SampleRate: %d",
-            numChannels, sampleRate);
-
-    InitOMXParams(&param);
-    param.nPortIndex = kPortIndexInput;
-
-    status_t err = mOMX->getParameter(
-                       mNode, OMX_IndexParamAudioDts, &param, sizeof(param));
-    if (err != OK)
-        return err;
-
-    param.nChannels = numChannels;
-    param.nSamplingRate = sampleRate;
-    //param.nBitsPerSample = bitsPerSample;
-
-    err = mOMX->setParameter(
-                    mNode, OMX_IndexParamAudioDts, &param, sizeof(param));
-    return err;
-}
-
 status_t OMXCodec::setFLACFormat(const sp<MetaData> &meta)
 {
     int32_t numChannels = 0;
@@ -4567,40 +4585,140 @@ status_t OMXCodec::setFLACFormat(const sp<MetaData> &meta)
     return err;
 }
 
-status_t OMXCodec::setFFmpegVideoFormat(const sp<MetaData> &meta)
+status_t OMXCodec::setMP2Format(const sp<MetaData> &meta)
 {
-    int32_t codec_id = 0;
-    int32_t width = 0;
-    int32_t height = 0;
-    OMX_VIDEO_PARAM_FFMPEGTYPE param;
-
-    ALOGD("setFFmpegVideoFormat");
+    int32_t numChannels = 0;
+    int32_t sampleRate = 0;
+    OMX_AUDIO_PARAM_MP2TYPE param;
 
     if (mIsEncoder) {
-        CODEC_LOGE("FFMPEG encoding not supported");
+        CODEC_LOGE("MP2 encoding not supported");
         return OK;
     }
 
-    CHECK(meta->findInt32(kKeyCodecId, &codec_id));
-    CHECK(meta->findInt32(kKeyWidth, &width));
-    CHECK(meta->findInt32(kKeyHeight, &height));
+    CHECK(meta->findInt32(kKeyChannelCount, &numChannels));
+    CHECK(meta->findInt32(kKeySampleRate, &sampleRate));
+
+    CODEC_LOGV("Channels: %d, SampleRate: %d",
+            numChannels, sampleRate);
 
     InitOMXParams(&param);
     param.nPortIndex = kPortIndexInput;
 
     status_t err = mOMX->getParameter(
-                       mNode, (OMX_INDEXTYPE)OMX_IndexParamVideoFFmpeg,
-                       &param, sizeof(param));
+                       mNode, OMX_IndexParamAudioMp2, &param, sizeof(param));
     if (err != OK)
         return err;
 
-    param.eCodecId = codec_id;
-    param.nWidth   = width;
-    param.nHeight  = height;
+    param.nChannels = numChannels;
+    param.nSampleRate = sampleRate;
 
     err = mOMX->setParameter(
-                    mNode, (OMX_INDEXTYPE)OMX_IndexParamVideoFFmpeg,
-                    &param, sizeof(param));
+                    mNode, OMX_IndexParamAudioMp2, &param, sizeof(param));
+    return err;
+}
+
+status_t OMXCodec::setAC3Format(const sp<MetaData> &meta)
+{
+    int32_t numChannels = 0;
+    int32_t sampleRate = 0;
+    int32_t bitsPerSample = 0;
+    OMX_AUDIO_PARAM_AC3TYPE param;
+
+    if (mIsEncoder) {
+        CODEC_LOGE("AC3 encoding not supported");
+        return OK;
+    }
+
+    CHECK(meta->findInt32(kKeyChannelCount, &numChannels));
+    CHECK(meta->findInt32(kKeySampleRate, &sampleRate));
+
+    CODEC_LOGV("Channels: %d, SampleRate: %d",
+            numChannels, sampleRate);
+
+    InitOMXParams(&param);
+    param.nPortIndex = kPortIndexInput;
+
+    status_t err = mOMX->getParameter(
+                       mNode, OMX_IndexParamAudioAc3, &param, sizeof(param));
+    if (err != OK)
+        return err;
+
+    param.nChannels = numChannels;
+    param.nSamplingRate = sampleRate;
+
+    err = mOMX->setParameter(
+                    mNode, OMX_IndexParamAudioAc3, &param, sizeof(param));
+    return err;
+}
+
+status_t OMXCodec::setAPEFormat(const sp<MetaData> &meta)
+{
+    int32_t numChannels = 0;
+    int32_t sampleRate = 0;
+    int32_t bitsPerSample = 0;
+    OMX_AUDIO_PARAM_APETYPE param;
+
+    if (mIsEncoder) {
+        CODEC_LOGE("APE encoding not supported");
+        return OK;
+    }
+
+    CHECK(meta->findInt32(kKeyChannelCount, &numChannels));
+    CHECK(meta->findInt32(kKeySampleRate, &sampleRate));
+    CHECK(meta->findInt32(kKeyBitspersample, &bitsPerSample));
+
+    CODEC_LOGV("Channels:%d, SampleRate:%d, bitsPerSample:%d",
+            numChannels, sampleRate, bitsPerSample);
+
+    InitOMXParams(&param);
+    param.nPortIndex = kPortIndexInput;
+
+    status_t err = mOMX->getParameter(
+                       mNode, OMX_IndexParamAudioApe, &param, sizeof(param));
+    if (err != OK)
+        return err;
+
+    param.nChannels = numChannels;
+    param.nSamplingRate = sampleRate;
+    param.nBitsPerSample = bitsPerSample;
+
+    err = mOMX->setParameter(
+                    mNode, OMX_IndexParamAudioApe, &param, sizeof(param));
+    return err;
+}
+
+status_t OMXCodec::setDTSFormat(const sp<MetaData> &meta)
+{
+    int32_t numChannels = 0;
+    int32_t sampleRate = 0;
+    int32_t bitsPerSample = 0;
+    OMX_AUDIO_PARAM_DTSTYPE param;
+
+    if (mIsEncoder) {
+        CODEC_LOGE("DTS encoding not supported");
+        return OK;
+    }
+
+    CHECK(meta->findInt32(kKeyChannelCount, &numChannels));
+    CHECK(meta->findInt32(kKeySampleRate, &sampleRate));
+
+    CODEC_LOGV("Channels: %d, SampleRate: %d",
+            numChannels, sampleRate);
+
+    InitOMXParams(&param);
+    param.nPortIndex = kPortIndexInput;
+
+    status_t err = mOMX->getParameter(
+                       mNode, OMX_IndexParamAudioDts, &param, sizeof(param));
+    if (err != OK)
+        return err;
+
+    param.nChannels = numChannels;
+    param.nSamplingRate = sampleRate;
+
+    err = mOMX->setParameter(
+                    mNode, OMX_IndexParamAudioDts, &param, sizeof(param));
     return err;
 }
 
@@ -5262,6 +5380,12 @@ static const char *videoCompressionFormatString(OMX_VIDEO_CODINGTYPE type) {
         "OMX_VIDEO_CodingRV",
         "OMX_VIDEO_CodingAVC",
         "OMX_VIDEO_CodingMJPEG",
+#if USES_NAM
+        "OMX_VIDEO_CodingVPX",
+        "OMX_VIDEO_CodingVC1",
+        "OMX_VIDEO_CodingFLV1",
+        "OMX_VIDEO_CodingDIVX",
+#endif
     };
 
     size_t numNames = sizeof(kNames) / sizeof(kNames[0]);
@@ -5303,6 +5427,13 @@ static const char *audioCodingTypeString(OMX_AUDIO_CODINGTYPE type) {
         "OMX_AUDIO_CodingWMA",
         "OMX_AUDIO_CodingRA",
         "OMX_AUDIO_CodingMIDI",
+#if USES_NAM
+        "OMX_AUDIO_CodingFLAC",
+        "OMX_AUDIO_CodingMP2",
+        "OMX_AUDIO_CodingAC3",
+        "OMX_AUDIO_CodingAPE",
+        "OMX_AUDIO_CodingDTS",
+#endif
     };
 
     size_t numNames = sizeof(kNames) / sizeof(kNames[0]);
