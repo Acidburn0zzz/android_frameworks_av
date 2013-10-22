@@ -466,7 +466,7 @@ sp<MediaSource> OMXCodec::Create(
             softwareCodec = InstantiateSoftwareDecoder(componentName, source);
         }
         if (softwareCodec != NULL) {
-            ALOGE("Successfully allocated software codec '%s'", componentName);
+            ALOGI("Successfully allocated software codec '%s'", componentName);
             return softwareCodec;
         }
 #ifdef QCOM_HARDWARE
@@ -772,6 +772,11 @@ status_t OMXCodec::configureCodec(const sp<MetaData> &meta) {
         }
 #endif
 #ifdef USES_NAM
+	} else if (!strcasecmp(MEDIA_MIMETYPE_AUDIO_MPEG, mMIME))  {
+		status_t err = setMP3Format(meta);
+		if (err!=OK) {
+			return err;
+		}
 	} else if (!strcasecmp(MEDIA_MIMETYPE_AUDIO_VORBIS, mMIME))  {
 		status_t err = setVORBISFormat(meta);
 		if (err!=OK) {
@@ -787,7 +792,7 @@ status_t OMXCodec::configureCodec(const sp<MetaData> &meta) {
 		if (err!=OK) {
 			return err;
 		}
-	} else if (!strcasecmp(MEDIA_MIMETYPE_AUDIO_MP2, mMIME))  {
+	} else if (!strcasecmp(MEDIA_MIMETYPE_AUDIO_MPEG_LAYER_II, mMIME))  {
 		status_t err = setMP2Format(meta);
 		if (err!=OK) {
 			return err;
@@ -4316,7 +4321,7 @@ status_t OMXCodec::setWMAFormat(const sp<MetaData> &meta)
 }
 #endif
 
-#if USES_NAM
+#ifdef USES_NAM
 //video
 status_t OMXCodec::setWMVFormat(const sp<MetaData> &meta)
 {
@@ -4472,6 +4477,44 @@ status_t OMXCodec::setWMAFormat(const sp<MetaData> &meta)
 
     err = mOMX->setParameter(
                     mNode, OMX_IndexParamAudioWma, &paramWMA, sizeof(paramWMA));
+    return err;
+}
+
+status_t OMXCodec::setMP3Format(const sp<MetaData> &meta)
+{
+    int32_t numChannels = 0;
+    int32_t sampleRate = 0;
+    OMX_AUDIO_PARAM_MP3TYPE param;
+
+    if (mIsEncoder) {
+        CODEC_LOGE("MP3 encoding not supported");
+        return OK;
+    }
+
+    //skip if not OMX.ffmpeg.mp3.decoder
+    if (strncmp(mComponentName, "OMX.ffmpeg.mp3.decoder", 22)) {
+        return OK;
+    }
+
+    CHECK(meta->findInt32(kKeyChannelCount, &numChannels));
+    CHECK(meta->findInt32(kKeySampleRate, &sampleRate));
+
+    CODEC_LOGV("Channels: %d, SampleRate: %d",
+            numChannels, sampleRate);
+
+    InitOMXParams(&param);
+    param.nPortIndex = kPortIndexInput;
+
+    status_t err = mOMX->getParameter(
+                       mNode, OMX_IndexParamAudioMp3, &param, sizeof(param));
+    if (err != OK)
+        return err;
+
+    param.nChannels = numChannels;
+    param.nSampleRate = sampleRate;
+
+    err = mOMX->setParameter(
+                    mNode, OMX_IndexParamAudioMp3, &param, sizeof(param));
     return err;
 }
 
@@ -5380,7 +5423,7 @@ static const char *videoCompressionFormatString(OMX_VIDEO_CODINGTYPE type) {
         "OMX_VIDEO_CodingRV",
         "OMX_VIDEO_CodingAVC",
         "OMX_VIDEO_CodingMJPEG",
-#if USES_NAM
+#ifdef USES_NAM
         "OMX_VIDEO_CodingVPX",
         "OMX_VIDEO_CodingVC1",
         "OMX_VIDEO_CodingFLV1",
@@ -5427,7 +5470,7 @@ static const char *audioCodingTypeString(OMX_AUDIO_CODINGTYPE type) {
         "OMX_AUDIO_CodingWMA",
         "OMX_AUDIO_CodingRA",
         "OMX_AUDIO_CodingMIDI",
-#if USES_NAM
+#ifdef USES_NAM
         "OMX_AUDIO_CodingFLAC",
         "OMX_AUDIO_CodingMP2",
         "OMX_AUDIO_CodingAC3",

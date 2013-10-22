@@ -403,6 +403,7 @@ private:
 	status_t setRVFormat(const sp<MetaData> &inputFormat);
 	status_t setFFmpegVideoFormat(const sp<MetaData> &inputFormat);
 	//audio
+	status_t setMP3Format(const sp<MetaData> &inputFormat);
 	status_t setVORBISFormat(const sp<MetaData> &inputFormat);
 	status_t setRAFormat(const sp<MetaData> &inputFormat);
 	status_t setFLACFormat(const sp<MetaData> &inputFormat);
