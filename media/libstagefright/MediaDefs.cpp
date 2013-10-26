@@ -63,6 +63,7 @@ const char *MEDIA_MIMETYPE_VIDEO_MJPEG = "video/x-jpeg";
 const char *MEDIA_MIMETYPE_VIDEO_RV = "video/vnd.rn-realvideo";
 const char *MEDIA_MIMETYPE_VIDEO_VC1 = "video/vc1";
 const char *MEDIA_MIMETYPE_VIDEO_WMV = "video/x-ms-wmv";
+const char *MEDIA_MIMETYPE_VIDEO_HEVC = "video/hevc";
 const char *MEDIA_MIMETYPE_VIDEO_FFMPEG = "video/ffmpeg";
 
 const char *MEDIA_MIMETYPE_AUDIO_AC3 = "audio/ac3";
@@ -89,6 +90,7 @@ const char *MEDIA_MIMETYPE_CONTAINER_TS = "video/mp2t";
 const char *MEDIA_MIMETYPE_CONTAINER_WEBM = "video/webm";
 const char *MEDIA_MIMETYPE_CONTAINER_WMA = "audio/x-ms-wma";
 const char *MEDIA_MIMETYPE_CONTAINER_WMV = "video/x-ms-wmv";
+const char *MEDIA_MIMETYPE_CONTAINER_HEVC = "video/hevc";
 const char *MEDIA_MIMETYPE_CONTAINER_FFMPEG = "video/ffmpeg";
 #endif // USES_NAM
 

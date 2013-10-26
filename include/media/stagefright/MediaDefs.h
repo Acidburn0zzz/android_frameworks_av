@@ -88,6 +88,7 @@ extern const char *MEDIA_MIMETYPE_VIDEO_MJPEG;
 extern const char *MEDIA_MIMETYPE_VIDEO_RV;
 extern const char *MEDIA_MIMETYPE_VIDEO_VC1;
 extern const char *MEDIA_MIMETYPE_VIDEO_WMV;
+extern const char *MEDIA_MIMETYPE_VIDEO_HEVC;
 extern const char *MEDIA_MIMETYPE_VIDEO_FFMPEG;
 
 extern const char *MEDIA_MIMETYPE_AUDIO_AC3;
@@ -114,6 +115,7 @@ extern const char *MEDIA_MIMETYPE_CONTAINER_TS;
 extern const char *MEDIA_MIMETYPE_CONTAINER_WEBM;
 extern const char *MEDIA_MIMETYPE_CONTAINER_WMA;
 extern const char *MEDIA_MIMETYPE_CONTAINER_WMV;
+extern const char *MEDIA_MIMETYPE_CONTAINER_HEVC;
 extern const char *MEDIA_MIMETYPE_CONTAINER_FFMPEG;
 #endif // USES_NAM
 

@@ -68,10 +68,6 @@
 #include <ctype.h>
 #endif
 
-#ifdef USES_NAM
-#include <OMX_FFExt.h>
-#endif
-
 namespace android {
 
 #ifdef USE_SAMSUNG_COLORFORMAT
@@ -987,7 +983,7 @@ status_t OMXCodec::setVideoPortFormatType(
         // CHECK_EQ(format.nIndex, index);
 
 #if 1
-        CODEC_LOGV("portIndex: %ld, index: %ld, eCompressionFormat=%d eColorFormat=%d",
+        CODEC_LOGV("portIndex: %ld, index: %ld, eCompressionFormat=0x%x eColorFormat=0x%x",
              portIndex,
              index, format.eCompressionFormat, format.eColorFormat);
 #endif
@@ -1023,6 +1019,7 @@ status_t OMXCodec::setVideoPortFormatType(
     }
 
     if (!found) {
+        CODEC_LOGE("not found a match.");
         return UNKNOWN_ERROR;
     }
 
@@ -1602,6 +1599,8 @@ status_t OMXCodec::setVideoOutputFormat(
 		compressionFormat = OMX_VIDEO_CodingFLV1;
 	} else if (!strcasecmp(MEDIA_MIMETYPE_VIDEO_DIVX, mime)) {
 		compressionFormat = OMX_VIDEO_CodingDIVX;
+	} else if (!strcasecmp(MEDIA_MIMETYPE_VIDEO_HEVC, mime)) {
+		compressionFormat = OMX_VIDEO_CodingHEVC;
 	} else if (!strcasecmp(MEDIA_MIMETYPE_VIDEO_FFMPEG, mime)) {
 		compressionFormat = OMX_VIDEO_CodingAutoDetect;
 #endif
@@ -4412,8 +4411,7 @@ status_t OMXCodec::setFFmpegVideoFormat(const sp<MetaData> &meta)
     param.nPortIndex = kPortIndexInput;
 
     status_t err = mOMX->getParameter(
-                       mNode, (OMX_INDEXTYPE)OMX_IndexParamVideoFFmpeg,
-                       &param, sizeof(param));
+                       mNode, OMX_IndexParamVideoFFmpeg, &param, sizeof(param));
     if (err != OK)
         return err;
 
@@ -4422,8 +4420,7 @@ status_t OMXCodec::setFFmpegVideoFormat(const sp<MetaData> &meta)
     param.nHeight  = height;
 
     err = mOMX->setParameter(
-                    mNode, (OMX_INDEXTYPE)OMX_IndexParamVideoFFmpeg,
-                    &param, sizeof(param));
+                    mNode, OMX_IndexParamVideoFFmpeg, &param, sizeof(param));
     return err;
 }
 
@@ -4795,8 +4792,7 @@ status_t OMXCodec::setFFmpegAudioFormat(const sp<MetaData> &meta)
     param.nPortIndex = kPortIndexInput;
 
     status_t err = mOMX->getParameter(
-                       mNode, (OMX_INDEXTYPE)OMX_IndexParamAudioFFmpeg,
-                       &param, sizeof(param));
+                       mNode, OMX_IndexParamAudioFFmpeg, &param, sizeof(param));
     if (err != OK)
         return err;
 
@@ -4809,8 +4805,7 @@ status_t OMXCodec::setFFmpegAudioFormat(const sp<MetaData> &meta)
 	param.eSampleFormat  = sampleFormat;
 
     err = mOMX->setParameter(
-                    mNode, (OMX_INDEXTYPE)OMX_IndexParamAudioFFmpeg,
-                    &param, sizeof(param));
+                    mNode, OMX_IndexParamAudioFFmpeg, &param, sizeof(param));
     return err;
 }
 
@@ -5428,6 +5423,8 @@ static const char *videoCompressionFormatString(OMX_VIDEO_CODINGTYPE type) {
         "OMX_VIDEO_CodingVC1",
         "OMX_VIDEO_CodingFLV1",
         "OMX_VIDEO_CodingDIVX",
+        "OMX_VIDEO_CodingHEVC",
+        "OMX_VIDEO_CodingFFMPEG",
 #endif
     };
 
@@ -5476,6 +5473,7 @@ static const char *audioCodingTypeString(OMX_AUDIO_CODINGTYPE type) {
         "OMX_AUDIO_CodingAC3",
         "OMX_AUDIO_CodingAPE",
         "OMX_AUDIO_CodingDTS",
+        "OMX_AUDIO_CodingFFMPEG",
 #endif
     };
 

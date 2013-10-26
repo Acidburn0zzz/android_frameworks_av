@@ -183,6 +183,9 @@ private:
     uint32_t mFlags;
     uint32_t mExtractorFlags;
     uint32_t mSinceLastDropped;
+#ifdef USES_NAM
+    bool mDropFramesDisable; //hevc test
+#endif
 
     int64_t mTimeSourceDeltaUs;
     int64_t mVideoTimeUs;

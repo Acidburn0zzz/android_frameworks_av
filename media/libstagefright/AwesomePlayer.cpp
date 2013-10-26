@@ -69,7 +69,7 @@
 #include <cutils/properties.h>
 
 #define USE_SURFACE_ALLOC 1
-#define FRAME_DROP_FREQ 0
+#define FRAME_DROP_FREQ 50
 #define LPA_MIN_DURATION_USEC_ALLOWED 30000000
 #define LPA_MIN_DURATION_USEC_DEFAULT 60000000
 
@@ -1795,14 +1795,21 @@ status_t AwesomePlayer::initVideoDecoder(uint32_t flags) {
 #endif
 
 #ifdef USES_NAM
-	{
-		char value[PROPERTY_VALUE_MAX];
-		property_get("sys.media.vdec.sw", value, "0");
-		if (atoi(value)) {
-			ALOGI("Software Codec is preferred for Video");
-			flags |= OMXCodec::kPreferSoftwareCodecs;
-		}
-	}
+    {
+        char value[PROPERTY_VALUE_MAX];
+        property_get("sys.media.vdec.sw", value, "0");
+        if (atoi(value)) {
+            ALOGI("Software Codec is preferred for Video");
+            flags |= OMXCodec::kPreferSoftwareCodecs;
+        }
+
+        mDropFramesDisable = false;
+        property_get("sys.media.vdec.drop", value, "1");
+        if (!atoi(value)) {
+            ALOGI("Don't drop frame even if late");
+            mDropFramesDisable = true;
+        }
+    }
 #endif
 
     ALOGV("initVideoDecoder flags=0x%x", flags);
@@ -2122,8 +2129,14 @@ void AwesomePlayer::onVideoEvent() {
             ALOGE("we're late by %lld us nowUs %lld, timeUs %lld",
                   latenessUs, nowUs, timeUs);
 
+#ifdef USES_NAM
+            if ((!(mFlags & SLOW_DECODER_HACK)
+                        || mSinceLastDropped > FRAME_DROP_FREQ)
+                    && !mDropFramesDisable)
+#else
             if (!(mFlags & SLOW_DECODER_HACK)
                     || mSinceLastDropped > FRAME_DROP_FREQ)
+#endif
             {
                 ALOGV("we're late by %lld us (%.2f secs) dropping "
                      "one after %d frames",
