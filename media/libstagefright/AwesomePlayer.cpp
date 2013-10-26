@@ -69,7 +69,7 @@
 #include <cutils/properties.h>
 
 #define USE_SURFACE_ALLOC 1
-#define FRAME_DROP_FREQ 50
+#define FRAME_DROP_FREQ 0
 #define LPA_MIN_DURATION_USEC_ALLOWED 30000000
 #define LPA_MIN_DURATION_USEC_DEFAULT 60000000
 
