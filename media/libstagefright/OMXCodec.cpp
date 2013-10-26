@@ -5407,6 +5407,31 @@ static const char *colorFormatString(OMX_COLOR_FORMATTYPE type) {
     }
 }
 
+#ifdef USES_NAM
+static const char *vendorVideoCompressionFormatString(OMX_VIDEO_CODINGTYPE type) {
+    static const char *kVendorNames[] = {
+        "OMX_VIDEO_CodingVendorStartUnused",
+        "OMX_VIDEO_CodingVC1",
+        "OMX_VIDEO_CodingFLV1",
+        "OMX_VIDEO_CodingDIVX",
+        "OMX_VIDEO_CodingHEVC",
+        "OMX_VIDEO_CodingFFMPEG",
+    };
+
+	CHECK_GE(type, OMX_VIDEO_CodingVendorStartUnused);
+
+    size_t index = (size_t)type - (size_t)OMX_VIDEO_CodingVendorStartUnused;
+
+    size_t numNames = sizeof(kVendorNames) / sizeof(kVendorNames[0]);
+
+    if (index >= numNames) {
+        return "UNKNOWN";
+    } else {
+        return kVendorNames[index];
+    }
+}
+#endif
+
 static const char *videoCompressionFormatString(OMX_VIDEO_CODINGTYPE type) {
     static const char *kNames[] = {
         "OMX_VIDEO_CodingUnused",
@@ -5420,13 +5445,14 @@ static const char *videoCompressionFormatString(OMX_VIDEO_CODINGTYPE type) {
         "OMX_VIDEO_CodingMJPEG",
 #ifdef USES_NAM
         "OMX_VIDEO_CodingVPX",
-        "OMX_VIDEO_CodingVC1",
-        "OMX_VIDEO_CodingFLV1",
-        "OMX_VIDEO_CodingDIVX",
-        "OMX_VIDEO_CodingHEVC",
-        "OMX_VIDEO_CodingFFMPEG",
 #endif
     };
+
+#ifdef USES_NAM
+    if (type >= OMX_VIDEO_CodingVendorStartUnused) {
+		return vendorVideoCompressionFormatString(type);
+    }
+#endif
 
     size_t numNames = sizeof(kNames) / sizeof(kNames[0]);
 
@@ -5436,6 +5462,31 @@ static const char *videoCompressionFormatString(OMX_VIDEO_CODINGTYPE type) {
         return kNames[type];
     }
 }
+
+#ifdef USES_NAM
+static const char *vendorAudioCodingTypeString(OMX_AUDIO_CODINGTYPE type) {
+    static const char *kVendorNames[] = {
+        "OMX_AUDIO_CodingVendorStartUnused",
+        "OMX_AUDIO_CodingMP2",
+        "OMX_AUDIO_CodingAC3",
+        "OMX_AUDIO_CodingAPE",
+        "OMX_AUDIO_CodingDTS",
+        "OMX_AUDIO_CodingFFMPEG",
+    };
+
+	CHECK_GE(type, OMX_AUDIO_CodingVendorStartUnused);
+
+    size_t index = (size_t)type - (size_t)OMX_AUDIO_CodingVendorStartUnused;
+
+    size_t numNames = sizeof(kVendorNames) / sizeof(kVendorNames[0]);
+
+    if (index >= numNames) {
+        return "UNKNOWN";
+    } else {
+        return kVendorNames[index];
+    }
+}
+#endif
 
 static const char *audioCodingTypeString(OMX_AUDIO_CODINGTYPE type) {
     static const char *kNames[] = {
@@ -5469,13 +5520,14 @@ static const char *audioCodingTypeString(OMX_AUDIO_CODINGTYPE type) {
         "OMX_AUDIO_CodingMIDI",
 #ifdef USES_NAM
         "OMX_AUDIO_CodingFLAC",
-        "OMX_AUDIO_CodingMP2",
-        "OMX_AUDIO_CodingAC3",
-        "OMX_AUDIO_CodingAPE",
-        "OMX_AUDIO_CodingDTS",
-        "OMX_AUDIO_CodingFFMPEG",
 #endif
     };
+
+#ifdef USES_NAM
+    if (type >= OMX_AUDIO_CodingVendorStartUnused) {
+		return vendorAudioCodingTypeString(type);
+    }
+#endif
 
     size_t numNames = sizeof(kNames) / sizeof(kNames[0]);
 
