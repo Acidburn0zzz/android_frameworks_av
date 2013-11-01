@@ -115,6 +115,7 @@ extern const char *MEDIA_MIMETYPE_CONTAINER_TS;
 extern const char *MEDIA_MIMETYPE_CONTAINER_WEBM;
 extern const char *MEDIA_MIMETYPE_CONTAINER_WMA;
 extern const char *MEDIA_MIMETYPE_CONTAINER_WMV;
+extern const char *MEDIA_MIMETYPE_CONTAINER_VC1;
 extern const char *MEDIA_MIMETYPE_CONTAINER_HEVC;
 extern const char *MEDIA_MIMETYPE_CONTAINER_FFMPEG;
 #endif // USES_NAM

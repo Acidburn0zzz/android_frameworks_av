@@ -1594,7 +1594,7 @@ status_t OMXCodec::setVideoOutputFormat(
 	} else if (!strcasecmp(MEDIA_MIMETYPE_VIDEO_RV, mime)) {
 		compressionFormat = OMX_VIDEO_CodingRV;
 	} else if (!strcasecmp(MEDIA_MIMETYPE_VIDEO_VC1, mime)) {
-		compressionFormat = OMX_VIDEO_CodingWMV;
+		compressionFormat = OMX_VIDEO_CodingVC1;
 	} else if (!strcasecmp(MEDIA_MIMETYPE_VIDEO_FLV1, mime)) {
 		compressionFormat = OMX_VIDEO_CodingFLV1;
 	} else if (!strcasecmp(MEDIA_MIMETYPE_VIDEO_DIVX, mime)) {
@@ -2006,7 +2006,7 @@ status_t OMXCodec::allocateBuffersOnPort(OMX_U32 portIndex) {
         return err;
     }
 
-    CODEC_LOGV("allocating %lu buffers of size %lu on %s port",
+    CODEC_LOGI("allocating %lu buffers of size %lu on %s port",
             def.nBufferCountActual, def.nBufferSize,
             portIndex == kPortIndexInput ? "input" : "output");
 
@@ -2079,7 +2079,7 @@ status_t OMXCodec::allocateBuffersOnPort(OMX_U32 portIndex) {
 
         mPortBuffers[portIndex].push(info);
 
-        CODEC_LOGV("allocated buffer %p on %s port", buffer,
+        CODEC_LOGI("allocated buffer %p on %s port", buffer,
              portIndex == kPortIndexInput ? "input" : "output");
     }
 

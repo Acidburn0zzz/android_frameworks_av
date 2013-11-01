@@ -38,6 +38,12 @@ public:
 
     virtual status_t getSize(off64_t *size);
 
+#ifdef USES_NAM
+    virtual String8 getUri() {
+        return mUri;
+    }
+#endif
+
     virtual sp<DecryptHandle> DrmInitialization(const char *mime);
 
     virtual void getDrmInfo(sp<DecryptHandle> &handle, DrmManagerClient **client);
@@ -47,9 +53,16 @@ protected:
 
 private:
     int mFd;
+#ifdef USES_NAM
+    String8 mUri;
+#endif
     int64_t mOffset;
     int64_t mLength;
     Mutex mLock;
+
+#ifdef USES_NAM
+	void fetchUriFromFd(int fd);
+#endif
 
     /*for DRM*/
     sp<DecryptHandle> mDecryptHandle;
