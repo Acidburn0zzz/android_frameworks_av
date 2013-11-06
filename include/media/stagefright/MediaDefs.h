@@ -94,7 +94,6 @@ extern const char *MEDIA_MIMETYPE_VIDEO_FFMPEG;
 extern const char *MEDIA_MIMETYPE_AUDIO_AC3;
 extern const char *MEDIA_MIMETYPE_AUDIO_APE;
 extern const char *MEDIA_MIMETYPE_AUDIO_DTS;
-extern const char *MEDIA_MIMETYPE_AUDIO_MP2;
 extern const char *MEDIA_MIMETYPE_AUDIO_PCM;
 extern const char *MEDIA_MIMETYPE_AUDIO_RA;
 extern const char *MEDIA_MIMETYPE_AUDIO_WMA;

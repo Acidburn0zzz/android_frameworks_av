@@ -69,7 +69,6 @@ const char *MEDIA_MIMETYPE_VIDEO_FFMPEG = "video/ffmpeg";
 const char *MEDIA_MIMETYPE_AUDIO_AC3 = "audio/ac3";
 const char *MEDIA_MIMETYPE_AUDIO_APE = "audio/x-ape";
 const char *MEDIA_MIMETYPE_AUDIO_DTS = "audio/vnd.dts";
-const char *MEDIA_MIMETYPE_AUDIO_MP2 = "audio/mpeg2";
 const char *MEDIA_MIMETYPE_AUDIO_PCM = "audio/x-pcm";
 const char *MEDIA_MIMETYPE_AUDIO_RA = "audio/vnd.rn-realaudio";
 const char *MEDIA_MIMETYPE_AUDIO_WMA = "audio/x-ms-wma";
