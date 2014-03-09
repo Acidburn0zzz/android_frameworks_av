@@ -1320,15 +1320,28 @@ void AwesomePlayer::initRenderer_l() {
     // before creating a new one.
     IPCThreadState::self()->flushCommands();
 
+    bool isSufaceAllocPreferred = false;
+    char value[PROPERTY_VALUE_MAX];
+    property_get("sys.media.vdec.nw", value, "0");
+    if (atoi(value)) {
+        isSufaceAllocPreferred = true;
+    }
+
     // Even if set scaling mode fails, we will continue anyway
     setVideoScalingMode_l(mVideoScalingMode);
+#ifdef USES_NAM
+    if ((USE_SURFACE_ALLOC
+            && !strncmp(component, "OMX.", 4)
+            && strncmp(component, "OMX.google.", 11)
+            && strncmp(component, "OMX.ffmpeg.", 11)
+            && strcmp(component, "OMX.Nvidia.mpeg2v.decode"))
+        ||  (!strncmp(component, "OMX.ffmpeg.", 11) && isSufaceAllocPreferred)) {
+#else
     if (USE_SURFACE_ALLOC
             && !strncmp(component, "OMX.", 4)
             && strncmp(component, "OMX.google.", 11)
-#ifdef USES_NAM
-            && strncmp(component, "OMX.ffmpeg.", 11)
-#endif
             && strcmp(component, "OMX.Nvidia.mpeg2v.decode")) {
+#endif
         // Hardware decoders avoid the CPU color conversion by decoding
         // directly to ANativeBuffers, so we must use a renderer that
         // just pushes those buffers to the ANativeWindow.

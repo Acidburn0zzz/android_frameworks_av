@@ -81,6 +81,10 @@
 #include "OMX_QCOMExtns.h"
 #endif
 
+#ifdef USES_NAM
+#include <cutils/properties.h>
+#endif
+
 namespace android {
 
 #ifdef USE_SAMSUNG_COLORFORMAT
@@ -1823,6 +1827,18 @@ OMXCodec::OMXCodec(
       ,mDeferReason(0)
 #endif
 {
+#ifdef USES_NAM
+    //check again when ffmpeg
+    if (mIsVideo && !strncmp(componentName, "OMX.ffmpeg.", 11)) {
+        char value[PROPERTY_VALUE_MAX];
+        property_get("sys.media.vdec.nw", value, "0");
+        if (atoi(value)) {
+            ALOGI("Software Codec is preferred SufaceAlloc");
+            mNativeWindow = nativeWindow;
+        }
+    }
+#endif
+
     mPortStatus[kPortIndexInput] = ENABLED;
     mPortStatus[kPortIndexOutput] = ENABLED;
 
