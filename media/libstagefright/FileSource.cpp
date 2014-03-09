@@ -26,6 +26,9 @@ namespace android {
 
 FileSource::FileSource(const char *filename)
     : mFd(-1),
+#ifdef USES_NAM
+      mUri(filename),
+#endif
       mOffset(0),
       mLength(-1),
       mDecryptHandle(NULL),
@@ -54,6 +57,7 @@ FileSource::FileSource(int fd, int64_t offset, int64_t length)
       mDrmBuf(NULL){
     CHECK(offset >= 0);
     CHECK(length >= 0);
+    fetchUriFromFd(fd);
 }
 
 FileSource::~FileSource() {
@@ -83,6 +87,22 @@ FileSource::~FileSource() {
 status_t FileSource::initCheck() const {
     return mFd >= 0 ? OK : NO_INIT;
 }
+
+#ifdef USES_NAM
+void FileSource::fetchUriFromFd(int fd) {
+    ssize_t len = 0;
+    char path[PATH_MAX] = {0};
+    char link[PATH_MAX] = {0};
+
+    mUri.clear();
+
+    snprintf(path, PATH_MAX, "/proc/%d/fd/%d", getpid(), fd);
+    if ((len = readlink(path, link, sizeof(link)-1)) != -1) {
+        link[len] = '\0';
+        mUri.setTo(link);
+    }
+}
+#endif //USES_NAM
 
 ssize_t FileSource::readAt(off64_t offset, void *data, size_t size) {
     if (mFd < 0) {

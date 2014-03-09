@@ -45,6 +45,10 @@
 
 namespace android {
 
+#ifdef USES_NAM
+MediaExtractor::Plugin MediaExtractor::sPlugin;
+#endif // USES_NAM
+
 sp<MetaData> MediaExtractor::getMetaData() {
     return new MetaData;
 }
@@ -94,9 +98,21 @@ sp<MediaExtractor> MediaExtractor::Create(
         }
     }
 
+#ifdef USES_NAM
+    AString extractorName;
     MediaExtractor *ret = NULL;
+    if (meta.get() != NULL && meta->findString("extended-extractor-use", &extractorName)
+           && sPlugin.create != NULL) {
+        if (!strcasecmp("ffmpegextractor", extractorName.c_str())) {
+            ALOGI("Use ffmpeg extended extractor for the special mime(%s) or codec", mime);
+            return sPlugin.create(source, mime, meta);
+        }
+    } else if (!strcasecmp(mime, MEDIA_MIMETYPE_CONTAINER_MPEG4)
+            || !strcasecmp(mime, "audio/mp4")) {
+#else
     if (!strcasecmp(mime, MEDIA_MIMETYPE_CONTAINER_MPEG4)
             || !strcasecmp(mime, "audio/mp4")) {
+#endif
         ret = new MPEG4Extractor(source);
     } else if (!strcasecmp(mime, MEDIA_MIMETYPE_AUDIO_MPEG)) {
         ret = new MP3Extractor(source, meta);
@@ -124,6 +140,10 @@ sp<MediaExtractor> MediaExtractor::Create(
     } else if (!strcasecmp(mime, MEDIA_MIMETYPE_AUDIO_RAW)) {
         ret = new PCMExtractor(source);
 #endif
+#ifdef USES_NAM
+    } else if (sPlugin.create) {
+        ret = sPlugin.create(source, mime, meta);
+#endif // USES_NAM
     }
 
     if (ret != NULL) {
