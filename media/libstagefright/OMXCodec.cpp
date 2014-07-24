@@ -785,14 +785,6 @@ status_t OMXCodec::configureCodec(const sp<MetaData> &meta) {
         }
 #endif
     } else if (!strcasecmp(MEDIA_MIMETYPE_AUDIO_MPEG, mMIME)) {
-#ifdef USES_NAM
-        if (!strncmp(mComponentName, "OMX.ffmpeg.mp3.decoder", 22)) {
-            status_t err = setMP3Format(meta);
-            if (err!=OK) {
-                return err;
-            }
-        } else {
-#endif //USES_NAM
         int32_t numChannels, sampleRate;
         if (meta->findInt32(kKeyChannelCount, &numChannels)
                 && meta->findInt32(kKeySampleRate, &sampleRate)) {
@@ -804,9 +796,19 @@ status_t OMXCodec::configureCodec(const sp<MetaData> &meta) {
                     numChannels);
         }
 #ifdef USES_NAM
+        if (!strncmp(mComponentName, "OMX.ffmpeg.mp3.decoder", 22)) {
+            status_t err = setMP3Format(meta);
+            if (err!=OK) {
+                return err;
+            }
         }
     } else if (!strcasecmp(MEDIA_MIMETYPE_AUDIO_VORBIS, mMIME)) {
         status_t err = setVORBISFormat(meta);
+        if (err!=OK) {
+            return err;
+        }
+    } else if (!strcasecmp(MEDIA_MIMETYPE_AUDIO_WMA, mMIME)) {
+        status_t err = setWMAFormat(meta);
         if (err!=OK) {
             return err;
         }
